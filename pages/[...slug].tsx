@@ -2,17 +2,43 @@ import { GetStaticPaths, GetStaticProps } from 'next'
 import Head from 'next/head'
 import { wordpressAPI } from '@/lib/api/wordpress-facade'
 import { ContentNode } from '@/types/wordpress'
-import { BaseArticleLayout } from '@/components/article/ArticleLayout'
-import FocusModeToggle from '@/components/study-tools/FocusModeToggle'
+import { BaseArticle } from '@/components/article/BaseArticle'
+import { ArticleComponent } from '@/components/article/types'
+import { FocusModeDecorator } from '@/components/article/decorators/FocusModeDecorator'
+import { TableOfContentsDecorator } from '@/components/article/decorators/TableOfContentsDecorator'
+import { StudyToolsDecorator } from '@/components/article/decorators/StudyToolsDecorator'
+import { BreadcrumbsDecorator } from '@/components/article/decorators/BreadcrumbsDecorator'
+import { RelatedPostsDecorator } from '@/components/article/decorators/RelatedPostsDecorator'
 import { ContentPageRenderer } from '@/lib/rendering/ContentPageRenderer'
 
 interface ContentPageProps {
   node: ContentNode
+  breadcrumbs: Array<{ label: string; uri: string }>
+  relatedPosts: Array<{
+    id: string
+    title: string
+    uri: string
+    excerpt?: string
+  }>
 }
 
 const pageRenderer = new ContentPageRenderer()
 
-export default function ContentPage({ node }: ContentPageProps) {
+export default function ContentPage({ node, breadcrumbs, relatedPosts }: ContentPageProps) {
+  const isPost = node.__typename === 'Post'
+  
+  // Build article with Decorator pattern
+  let article: ArticleComponent = new BaseArticle(node)
+  article = new BreadcrumbsDecorator(article, breadcrumbs)
+  
+  // Only apply these decorators to Posts (blog articles), not Pages
+  if (isPost) {
+    article = new StudyToolsDecorator(article)
+    article = new TableOfContentsDecorator(article)
+    article = new FocusModeDecorator(article)
+    article = new RelatedPostsDecorator(article, relatedPosts)
+  }
+
   return (
     <>
       <Head>
@@ -34,11 +60,9 @@ export default function ContentPage({ node }: ContentPageProps) {
         )}
       </Head>
 
-      <div className="mb-6 flex justify-end max-w-4xl mx-auto">
-        <FocusModeToggle />
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {article.render()}
       </div>
-
-      <BaseArticleLayout node={node} />
     </>
   )
 }

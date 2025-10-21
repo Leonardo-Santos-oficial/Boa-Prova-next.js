@@ -1,4 +1,10 @@
 @import "tailwindcss";
+@import "./navigation.css";
+@import "./prose.css";
+
+html {
+  scroll-behavior: smooth;
+}
 
 body {
   background-color: white;
