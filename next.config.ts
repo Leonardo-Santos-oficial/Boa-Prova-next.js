@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { getRedirects } from './lib/redirects';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -7,18 +8,7 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
   },
   async redirects() {
-    return [
-      {
-        source: '/category/:slug*',
-        destination: '/:slug*',
-        permanent: true,
-      },
-      {
-        source: '/:year(\\d{4})/:month(\\d{2})/:slug*',
-        destination: '/',
-        permanent: true,
-      },
-    ]
+    return getRedirects()
   },
   async headers() {
     return [
