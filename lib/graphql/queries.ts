@@ -77,12 +77,12 @@ export const GET_NODE_BY_URI = gql`
 
 export const GET_ALL_URIS = gql`
   query GetAllUris {
-    posts(first: 10000) {
+    posts(first: 10000, where: { status: PUBLISH }) {
       nodes {
         uri
       }
     }
-    pages(first: 1000) {
+    pages(first: 1000, where: { status: PUBLISH }) {
       nodes {
         uri
       }

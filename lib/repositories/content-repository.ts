@@ -2,6 +2,7 @@ import { ContentNode, AllUrisResponse } from '@/types/wordpress'
 import { IGraphQLClient } from '@/lib/graphql/graphql-client'
 import { GET_NODE_BY_URI, GET_ALL_URIS } from '@/lib/graphql/queries'
 import { MockContentDataSource } from '@/lib/data-sources/mock-content'
+import { contentCache, urisCache } from '@/lib/cache/cache-manager'
 
 // DIP: Dependemos de abstração (interface), não de implementação concreta
 export interface IContentRepository {
@@ -22,17 +23,21 @@ export class ContentRepository implements IContentRepository {
       return MockContentDataSource.getNodeByUri(uri)
     }
 
-    try {
-      const normalizedUri = this.normalizeUri(uri)
-      const data = await this.graphqlClient.request<{ nodeByUri: ContentNode | null }>(
-        GET_NODE_BY_URI,
-        { uri: normalizedUri }
-      )
-      return data.nodeByUri
-    } catch (error) {
-      console.error(`ContentRepository: Failed to fetch node for URI: ${uri}`, error)
-      return null
-    }
+    const normalizedUri = this.normalizeUri(uri)
+    const cacheKey = `content:${normalizedUri}`
+
+    return contentCache.getOrFetch(cacheKey, async () => {
+      try {
+        const data = await this.graphqlClient.request<{ nodeByUri: ContentNode | null }>(
+          GET_NODE_BY_URI,
+          { uri: normalizedUri }
+        )
+        return data.nodeByUri
+      } catch (error) {
+        console.error(`ContentRepository: Failed to fetch node for URI: ${uri}`, error)
+        return null
+      }
+    })
   }
 
   async getAllUris(): Promise<string[]> {
@@ -40,19 +45,21 @@ export class ContentRepository implements IContentRepository {
       return MockContentDataSource.getAllUris()
     }
 
-    try {
-      const data = await this.graphqlClient.request<AllUrisResponse>(GET_ALL_URIS)
-      
-      const allUris = [
-        ...data.posts.nodes.map((node: { uri: string }) => node.uri),
-        ...data.pages.nodes.map((node: { uri: string }) => node.uri),
-      ]
+    return urisCache.getOrFetch('all-uris', async () => {
+      try {
+        const data = await this.graphqlClient.request<AllUrisResponse>(GET_ALL_URIS)
+        
+        const allUris = [
+          ...data.posts.nodes.map((node: { uri: string }) => node.uri),
+          ...data.pages.nodes.map((node: { uri: string }) => node.uri),
+        ]
 
-      return allUris
-    } catch (error) {
-      console.error('ContentRepository: Failed to fetch all URIs', error)
-      return []
-    }
+        return allUris
+      } catch (error) {
+        console.error('ContentRepository: Failed to fetch all URIs', error)
+        return []
+      }
+    })
   }
 
   async getRelatedPosts(postId: string, limit: number = 3): Promise<ContentNode[]> {

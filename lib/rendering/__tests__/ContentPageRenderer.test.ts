@@ -111,11 +111,13 @@ describe('ContentPageRenderer', () => {
     })
 
     it('should handle errors gracefully', async () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
       mockGetContentByUri.mockRejectedValueOnce(new Error('Network error'))
 
       const result = await renderer.render({ slug: ['error-post'] })
 
       expect(result).toEqual({ notFound: true })
+      consoleSpy.mockRestore()
     })
   })
 

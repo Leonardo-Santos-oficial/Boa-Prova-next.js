@@ -1,8 +1,14 @@
 import { ContentRepository } from '../content-repository'
 import { IGraphQLClient } from '../../graphql/graphql-client'
 import { ContentNode } from '@/types/wordpress'
+import { contentCache, urisCache } from '@/lib/cache/cache-manager'
 
 describe('ContentRepository', () => {
+  beforeEach(() => {
+    contentCache.clear()
+    urisCache.clear()
+  })
+
   describe('with mock data', () => {
     let repository: ContentRepository
 
@@ -82,11 +88,13 @@ describe('ContentRepository', () => {
     })
 
     it('should handle GraphQL errors gracefully', async () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
       mockClient.request.mockRejectedValueOnce(new Error('GraphQL Error'))
 
       const result = await repository.getByUri('test-post')
 
       expect(result).toBeNull()
+      consoleSpy.mockRestore()
     })
   })
 })
