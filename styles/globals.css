@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+body {
+  background-color: white;
+  color: rgb(17, 24, 39);
+}
+
+.dark body {
+  background-color: rgb(17, 24, 39);
+  color: rgb(243, 244, 246);
+}
+
+.focus-mode {
+  max-width: 768px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.focus-mode aside,
+.focus-mode footer,
+.focus-mode .ad-container {
+  display: none;
+}
