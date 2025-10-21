@@ -2,7 +2,6 @@ import {
   createRedirectChain,
   OldCategoryRedirectHandler,
   LegacyDateRedirectHandler,
-  TrailingSlashRedirectHandler,
 } from '../redirect-chain'
 
 describe('Redirect Chain', () => {
@@ -40,29 +39,6 @@ describe('Redirect Chain', () => {
         destination: '/meu-post/',
         permanent: true,
       })
-    })
-  })
-
-  describe('TrailingSlashRedirectHandler', () => {
-    it('should add trailing slash to URLs', async () => {
-      const handler = new TrailingSlashRedirectHandler()
-      const result = await handler.handle({
-        path: '/about',
-      })
-
-      expect(result).toEqual({
-        destination: '/about/',
-        permanent: true,
-      })
-    })
-
-    it('should not add trailing slash to file URLs', async () => {
-      const handler = new TrailingSlashRedirectHandler()
-      const result = await handler.handle({
-        path: '/image.jpg',
-      })
-
-      expect(result).toBeNull()
     })
   })
 

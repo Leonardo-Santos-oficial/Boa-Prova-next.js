@@ -83,19 +83,6 @@ export class QueryParameterRedirectHandler extends RedirectHandler {
   }
 }
 
-export class TrailingSlashRedirectHandler extends RedirectHandler {
-  protected async process(request: RedirectRequest): Promise<RedirectResult | null> {
-    if (!request.path.endsWith('/') && !request.path.includes('.')) {
-      return {
-        destination: `${request.path}/`,
-        permanent: true
-      }
-    }
-    
-    return null
-  }
-}
-
 export class LegacyDateRedirectHandler extends RedirectHandler {
   protected async process(request: RedirectRequest): Promise<RedirectResult | null> {
     const datePattern = /^\/(\d{4})\/(\d{2})\/(\d{2})\/(.+)$/
@@ -118,13 +105,11 @@ export function createRedirectChain(): RedirectHandler {
   const legacyDateHandler = new LegacyDateRedirectHandler()
   const oldCategoryHandler = new OldCategoryRedirectHandler()
   const oldTagHandler = new OldTagRedirectHandler()
-  const trailingSlashHandler = new TrailingSlashRedirectHandler()
 
   queryParamHandler
     .setNext(legacyDateHandler)
     .setNext(oldCategoryHandler)
     .setNext(oldTagHandler)
-    .setNext(trailingSlashHandler)
 
   return queryParamHandler
 }
