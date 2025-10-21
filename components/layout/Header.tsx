@@ -1,7 +1,14 @@
 import Link from 'next/link'
 import ThemeToggle from '../navigation/ThemeToggle'
+import { MainNav } from '../navigation/MainNav'
+import { MobileNav } from '../navigation/MobileNav'
+import { NavBuilder } from '../navigation/NavBuilder'
+import { navigationData } from '../navigation/navigation-data'
 
 export default function Header() {
+  const navBuilder = new NavBuilder()
+  const navItems = navBuilder.buildMany(navigationData)
+
   return (
     <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -12,34 +19,14 @@ export default function Header() {
             </Link>
           </div>
 
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link 
-              href="/direito-constitucional" 
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-            >
-              Direito Constitucional
-            </Link>
-            <Link 
-              href="/lingua-portuguesa" 
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-            >
-              Língua Portuguesa
-            </Link>
-            <Link 
-              href="/raciocinio-logico" 
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-            >
-              Raciocínio Lógico
-            </Link>
-            <Link 
-              href="/media-kit" 
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-            >
-              Anuncie
-            </Link>
-          </nav>
+          <div className="hidden md:flex items-center space-x-8">
+            <MainNav items={navItems} />
+          </div>
 
           <div className="flex items-center space-x-4">
+            <div className="md:hidden">
+              <MobileNav items={navItems} />
+            </div>
             <ThemeToggle />
           </div>
         </div>
