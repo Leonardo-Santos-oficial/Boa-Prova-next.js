@@ -4,10 +4,13 @@ import { wordpressAPI } from '@/lib/api/wordpress-facade'
 import { ContentNode } from '@/types/wordpress'
 import { BaseArticleLayout } from '@/components/article/ArticleLayout'
 import FocusModeToggle from '@/components/study-tools/FocusModeToggle'
+import { ContentPageRenderer } from '@/lib/rendering/ContentPageRenderer'
 
 interface ContentPageProps {
   node: ContentNode
 }
+
+const pageRenderer = new ContentPageRenderer()
 
 export default function ContentPage({ node }: ContentPageProps) {
   return (
@@ -58,27 +61,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 }
 
 export const getStaticProps: GetStaticProps<ContentPageProps> = async (context) => {
-  const slug = (context.params?.slug as string[]) || []
-  const uri = slug.join('/')
-  
-  if (uri.startsWith('_next') || uri.includes('.') || uri === 'favicon.ico') {
-    return {
-      notFound: true,
-    }
-  }
-  
-  const node = await wordpressAPI.getContentByUri(uri)
-
-  if (!node) {
-    return {
-      notFound: true,
-    }
-  }
-
-  return {
-    props: {
-      node,
-    },
-    revalidate: 3600,
-  }
+  return pageRenderer.render({
+    slug: context.params?.slug as string[]
+  })
 }
