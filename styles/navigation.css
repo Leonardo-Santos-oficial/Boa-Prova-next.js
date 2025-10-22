@@ -20,13 +20,13 @@
   padding: 0;
 }
 
-.nav-item.depth-0 > .nav-link,
-.nav-item.depth-0 > .nav-label {
+.main-nav .nav-item.depth-0 > .nav-link,
+.main-nav .nav-item.depth-0 > .nav-label {
   display: flex;
   align-items: center;
   gap: 0.25rem;
   padding: 0.75rem 1rem;
-  color: rgb(55, 65, 81);
+  color: rgb(31, 41, 55) !important; /* gray-800 - Excellent contrast on white */
   transition: all 0.2s ease;
   cursor: pointer;
   font-weight: 500;
@@ -35,20 +35,20 @@
   border-bottom: 2px solid transparent;
 }
 
-.dark .nav-item.depth-0 > .nav-link,
-.dark .nav-item.depth-0 > .nav-label {
-  color: rgb(209, 213, 219);
+.dark .main-nav .nav-item.depth-0 > .nav-link,
+.dark .main-nav .nav-item.depth-0 > .nav-label {
+  color: rgb(229, 231, 235) !important; /* gray-200 - Better contrast in dark mode */
 }
 
-.nav-item.depth-0 > .nav-link:hover,
-.nav-item.depth-0 > .nav-label:hover {
-  color: rgb(79, 70, 229);
+.main-nav .nav-item.depth-0 > .nav-link:hover,
+.main-nav .nav-item.depth-0 > .nav-label:hover {
+  color: rgb(79, 70, 229) !important;
   border-bottom-color: rgb(79, 70, 229);
 }
 
-.dark .nav-item.depth-0 > .nav-link:hover,
-.dark .nav-item.depth-0 > .nav-label:hover {
-  color: rgb(165, 180, 252);
+.dark .main-nav .nav-item.depth-0 > .nav-link:hover,
+.dark .main-nav .nav-item.depth-0 > .nav-label:hover {
+  color: rgb(165, 180, 252) !important;
   border-bottom-color: rgb(165, 180, 252);
 }
 
@@ -127,30 +127,30 @@
   display: block;
 }
 
-.nav-submenu .nav-link,
-.nav-submenu .nav-label {
+.main-nav .nav-submenu .nav-link,
+.main-nav .nav-submenu .nav-label {
   display: block;
   padding: 0.5rem 1rem;
-  color: rgb(55, 65, 81);
+  color: rgb(31, 41, 55) !important; /* gray-800 - Better contrast */
   text-decoration: none;
   transition: background-color 0.2s;
   font-weight: 400;
   border-bottom: none;
 }
 
-.dark .nav-submenu .nav-link,
-.dark .nav-submenu .nav-label {
-  color: rgb(209, 213, 219);
+.dark .main-nav .nav-submenu .nav-link,
+.dark .main-nav .nav-submenu .nav-label {
+  color: rgb(229, 231, 235) !important; /* gray-200 - Better contrast */
 }
 
-.nav-submenu .nav-link:hover,
-.nav-submenu .nav-label:hover {
+.main-nav .nav-submenu .nav-link:hover,
+.main-nav .nav-submenu .nav-label:hover {
   background-color: rgb(229, 231, 235);
   color: rgb(79, 70, 229);
 }
 
-.dark .nav-submenu .nav-link:hover,
-.dark .nav-submenu .nav-label:hover {
+.dark .main-nav .nav-submenu .nav-link:hover,
+.dark .main-nav .nav-submenu .nav-label:hover {
   background-color: rgb(55, 65, 81);
   color: rgb(165, 180, 252);
 }
@@ -232,14 +232,14 @@
 .mobile-nav .nav-label {
   display: block;
   padding: 0.75rem 0;
-  color: rgb(55, 65, 81);
+  color: rgb(31, 41, 55) !important; /* gray-800 for better contrast */
   text-decoration: none;
   font-weight: 500;
 }
 
 .dark .mobile-nav .nav-link,
 .dark .mobile-nav .nav-label {
-  color: rgb(209, 213, 219);
+  color: rgb(229, 231, 235) !important; /* gray-200 for better contrast */
 }
 
 .mobile-nav .nav-submenu {
@@ -257,6 +257,12 @@
   padding: 0.5rem 0;
   font-weight: 400;
   font-size: 0.875rem;
+  color: rgb(31, 41, 55) !important; /* gray-800 for better contrast */
+}
+
+.dark .mobile-nav .nav-submenu .nav-link,
+.dark .mobile-nav .nav-submenu .nav-label {
+  color: rgb(229, 231, 235) !important; /* gray-200 for better contrast */
 }
 
 @media (min-width: 768px) {

@@ -9,6 +9,7 @@ html {
 body {
   background-color: white;
   color: rgb(17, 24, 39);
+  transition: background-color 0.3s ease, max-width 0.3s ease;
 }
 
 .dark body {
@@ -16,14 +17,33 @@ body {
   color: rgb(243, 244, 246);
 }
 
+/* Focus Mode Styles */
 .focus-mode {
   max-width: 768px;
   margin-left: auto;
   margin-right: auto;
+  transition: max-width 0.3s ease;
+}
+
+.focus-mode main {
+  transition: padding 0.3s ease;
 }
 
 .focus-mode aside,
 .focus-mode footer,
 .focus-mode .ad-container {
   display: none;
+}
+
+/* Smooth transitions for header/footer */
+header,
+footer {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.focus-mode header,
+.focus-mode footer {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
 }

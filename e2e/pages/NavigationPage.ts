@@ -14,12 +14,19 @@ export class NavigationPage {
   }
 
   async hoverOnMenuItem(label: string): Promise<void> {
-    const item = this.page.getByRole('link', { name: label }).first()
+    // Try link first, then fall back to any text (for items without href like dropdowns)
+    const linkItem = this.page.getByRole('link', { name: label }).first()
+    const textItem = this.page.locator('.nav-link, .nav-label').filter({ hasText: label }).first()
+    
+    const item = await linkItem.count() > 0 ? linkItem : textItem
     await item.hover()
   }
 
   async clickMenuItem(label: string): Promise<void> {
-    const item = this.page.getByRole('link', { name: label }).first()
+    const linkItem = this.page.getByRole('link', { name: label }).first()
+    const textItem = this.page.locator('.nav-link, .nav-label').filter({ hasText: label }).first()
+    
+    const item = await linkItem.count() > 0 ? linkItem : textItem
     await item.click()
   }
 

@@ -50,6 +50,7 @@ export class PomodoroTimer implements PomodoroContext {
 
   setRemainingTime(time: number): void {
     this.remainingTime = time
+    this.notifyObservers()
   }
 
   getCompletedSessions(): number {

@@ -20,8 +20,11 @@ export class IdleState implements PomodoroTimerState {
     throw new Error('Cannot resume when idle')
   }
 
-  reset(): void {
-    // Already idle
+  reset(context: PomodoroContext): void {
+    // Already idle, just restore default time
+    context.setRemainingTime(context.getSettings().workDuration * 60)
+    context.setPhase(PomodoroPhase.Work)
+    context.resetCompletedSessions()
   }
 
   skip(): void {
@@ -53,6 +56,7 @@ export class RunningState implements PomodoroTimerState {
   reset(context: PomodoroContext): void {
     context.setState(new IdleState())
     context.setPhase(PomodoroPhase.Work)
+    context.setRemainingTime(context.getSettings().workDuration * 60)
     context.resetCompletedSessions()
   }
 
@@ -116,6 +120,7 @@ export class PausedState implements PomodoroTimerState {
   reset(context: PomodoroContext): void {
     context.setState(new IdleState())
     context.setPhase(PomodoroPhase.Work)
+    context.setRemainingTime(context.getSettings().workDuration * 60)
     context.resetCompletedSessions()
   }
 

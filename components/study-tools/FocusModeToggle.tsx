@@ -10,10 +10,17 @@ export default function FocusModeToggle() {
       size="sm"
       onClick={toggle}
       className="flex items-center space-x-2"
-      aria-label={isActive ? 'Desativar modo foco' : 'Ativar modo foco'}
+      aria-label={isActive ? 'Desativar modo foco (Ctrl+F ou F)' : 'Ativar modo foco (Ctrl+F ou F)'}
+      aria-pressed={isActive}
+      title={isActive ? 'Desativar modo foco (Ctrl+F ou F)' : 'Ativar modo foco (Ctrl+F ou F)'}
     >
-      <span className="text-xl">{isActive ? '👁️' : '🎯'}</span>
+      <span className="text-xl" aria-hidden="true">{isActive ? '👁️' : '🎯'}</span>
       <span>{isActive ? 'Sair do Modo Foco' : 'Modo Foco'}</span>
+      <span className="sr-only">
+        {isActive 
+          ? 'Modo foco ativo. Pressione Ctrl+F ou F para desativar.' 
+          : 'Modo foco inativo. Pressione Ctrl+F ou F para ativar.'}
+      </span>
     </Button>
   )
 }
