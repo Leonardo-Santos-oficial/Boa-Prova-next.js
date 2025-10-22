@@ -4,6 +4,12 @@ import { LoopPreventionDecorator } from './lib/redirects/loop-prevention-decorat
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
+  
+  // Ignore homepage and exact static pages
+  if (path === '/' || path === '/index') {
+    return NextResponse.next()
+  }
+  
   const query = Object.fromEntries(request.nextUrl.searchParams.entries())
 
   const baseChain = createRedirectChain()

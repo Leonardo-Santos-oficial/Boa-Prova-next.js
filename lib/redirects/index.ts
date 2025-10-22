@@ -17,11 +17,6 @@ export function getRedirects(): Array<{
       source: '/:year(\\d{4})/:month(\\d{2})/:slug*',
       destination: '/:slug*',
       permanent: true
-    },
-    {
-      source: '/:path*/',
-      destination: '/:path*',
-      permanent: true
     }
   ]
 }
