@@ -41,7 +41,14 @@ describe('ContentPageRenderer', () => {
 
       expect(mockGetContentByUri).toHaveBeenCalledWith('test-post')
       expect(result).toEqual({
-        props: { node: mockNode },
+        props: {
+          node: mockNode,
+          breadcrumbs: [
+            { label: 'Início', uri: '/' },
+            { label: 'Test Post', uri: '/test-post/' }
+          ],
+          relatedPosts: []
+        },
         revalidate: 3600,
       })
     })
@@ -105,7 +112,14 @@ describe('ContentPageRenderer', () => {
       const result = await renderer.render({ slug: ['complete-post'] })
 
       expect(result).toEqual({
-        props: { node: mockNode },
+        props: {
+          node: mockNode,
+          breadcrumbs: [
+            { label: 'Início', uri: '/' },
+            { label: 'Complete Post', uri: '/complete-post/' }
+          ],
+          relatedPosts: []
+        },
         revalidate: 3600,
       })
     })

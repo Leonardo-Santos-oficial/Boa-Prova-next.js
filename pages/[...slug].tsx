@@ -10,6 +10,7 @@ import { StudyToolsDecorator } from '@/components/article/decorators/StudyToolsD
 import { BreadcrumbsDecorator } from '@/components/article/decorators/BreadcrumbsDecorator'
 import { RelatedPostsDecorator } from '@/components/article/decorators/RelatedPostsDecorator'
 import { ContentPageRenderer } from '@/lib/rendering/ContentPageRenderer'
+import { StudyToolsPanel } from '@/components/study-tools/StudyToolsPanel'
 
 interface ContentPageProps {
   node: ContentNode
@@ -63,6 +64,8 @@ export default function ContentPage({ node, breadcrumbs, relatedPosts }: Content
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {article.render()}
       </div>
+
+      {isPost && <StudyToolsPanel articleContent={node.content || ''} />}
     </>
   )
 }
