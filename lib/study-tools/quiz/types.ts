@@ -49,7 +49,10 @@ export interface QuizContext {
   calculateScore(): number
 }
 
+export type QuestionDraft = Omit<Question, 'id' | 'type'>
+
 export interface QuestionGenerationStrategy {
   generate(content: string, count: number): Promise<Question[]>
   supports(type: QuestionType): boolean
+  isAvailable(): boolean
 }

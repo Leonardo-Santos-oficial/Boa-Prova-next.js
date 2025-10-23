@@ -2,7 +2,6 @@ import {
   StudyPlan,
   StudyPlanMemento,
   StudyPlanState,
-  StudySession,
   StudyTopic
 } from './types'
 

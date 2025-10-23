@@ -26,7 +26,7 @@ export function PomodoroComponent() {
         setPhase(newPhase)
         setRemainingTime(newRemainingTime)
       },
-      onPhaseComplete: (completedPhase) => {
+      onPhaseComplete: () => {
         if (typeof Audio !== 'undefined') {
           const audio = new Audio('/sounds/notification.mp3')
           audio.play().catch(() => {})

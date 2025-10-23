@@ -5,8 +5,6 @@ export function getRedirects(): Array<{
   destination: string
   permanent: boolean
 }> {
-  const chain = new RedirectChain()
-
   return [
     {
       source: '/category/:slug*',

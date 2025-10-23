@@ -13,7 +13,7 @@ export function StudyPlanComponent() {
   const [caretaker] = useState(new StudyPlanCaretaker())
   const [showHistory, setShowHistory] = useState(false)
 
-  const [topics, setTopics] = useState<StudyTopic[]>([
+  const [topics] = useState<StudyTopic[]>([
     {
       id: 'topic-1',
       title: 'Introdução ao Tema',

@@ -27,11 +27,13 @@ export class InMemoryCacheStrategy<T> implements CacheStrategy<T> {
 
 export class NoCacheStrategy<T> implements CacheStrategy<T> {
   get(_key: string): T | undefined {
+    void _key
     return undefined
   }
 
   set(_key: string, _value: T): void {
-    // No-op
+    void _key
+    void _value
   }
 
   clear(): void {
@@ -39,6 +41,7 @@ export class NoCacheStrategy<T> implements CacheStrategy<T> {
   }
 
   has(_key: string): boolean {
+    void _key
     return false
   }
 }

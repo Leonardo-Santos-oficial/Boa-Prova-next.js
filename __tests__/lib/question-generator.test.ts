@@ -1,5 +1,8 @@
 import { QuestionGenerator } from '@/lib/study-tools/quiz/QuestionGenerator'
-import { QuestionType } from '@/lib/study-tools/quiz/types'
+import { AIMultipleChoiceStrategy } from '@/lib/study-tools/quiz/strategies/AIQuestionStrategies'
+import { MultipleChoiceStrategy, TrueFalseStrategy } from '@/lib/study-tools/quiz/strategies/HeuristicStrategies'
+import { QuizAIClient } from '@/lib/study-tools/quiz/ai/QuizAIClient'
+import { QuestionDraft, QuestionType } from '@/lib/study-tools/quiz/types'
 
 describe('Question Generator Strategy Pattern', () => {
   const mockContent = `
@@ -69,5 +72,60 @@ describe('Question Generator Strategy Pattern', () => {
     expect(questions[0].id).toBeDefined()
     expect(questions[0].text).toBeDefined()
     expect(questions[0].text.length).toBeGreaterThan(0)
+  })
+
+  it('should fall back to heuristic strategy when AI fails', async () => {
+    const failingClient: QuizAIClient = {
+      canGenerate: () => true,
+      generate: () => Promise.reject(new Error('AI unavailable'))
+    }
+
+    const generator = new QuestionGenerator([
+      new AIMultipleChoiceStrategy(failingClient),
+      new MultipleChoiceStrategy(),
+      new TrueFalseStrategy()
+    ])
+
+    const questions = await generator.generateQuestions(mockContent, QuestionType.MultipleChoice, 1)
+
+    expect(questions.length).toBe(1)
+    expect(questions[0].id).toContain('mcq-')
+  })
+
+  it('should use AI strategy when available', async () => {
+    const aiQuestions: QuestionDraft[] = [
+      {
+        text: 'Qual é o objetivo principal da Constituição Federal?',
+        options: [
+          'Estabelecer os fundamentos do Estado brasileiro',
+          'Definir regras apenas para o Poder Executivo',
+          'Criar leis para estados e municípios',
+          'Regular exclusivamente direitos trabalhistas'
+        ],
+        correctAnswer: 0,
+        explanation: 'A Constituição organiza o Estado e garante direitos fundamentais.'
+      }
+    ]
+
+    let wasCalled = false
+    const successfulClient: QuizAIClient = {
+      canGenerate: () => true,
+      generate: async () => {
+        wasCalled = true
+        return aiQuestions
+      }
+    }
+
+    const generator = new QuestionGenerator([
+      new AIMultipleChoiceStrategy(successfulClient),
+      new MultipleChoiceStrategy(),
+      new TrueFalseStrategy()
+    ])
+
+    const questions = await generator.generateQuestions(mockContent, QuestionType.MultipleChoice, 1)
+
+    expect(wasCalled).toBe(true)
+    expect(questions[0].id).toContain('ai-mcq')
+    expect(questions[0].options).toEqual(aiQuestions[0].options)
   })
 })

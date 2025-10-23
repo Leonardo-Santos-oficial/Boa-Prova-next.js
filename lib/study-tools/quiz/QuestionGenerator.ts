@@ -1,90 +1,35 @@
 import { Question, QuestionType, QuestionGenerationStrategy } from './types'
+import { QuizAIClient } from './ai/QuizAIClient'
+import { OpenAIQuizClient } from './ai/OpenAIQuizClient'
+import { AIMultipleChoiceStrategy, AITrueFalseStrategy } from './strategies/AIQuestionStrategies'
+import { MultipleChoiceStrategy, TrueFalseStrategy } from './strategies/HeuristicStrategies'
 
-export class MultipleChoiceStrategy implements QuestionGenerationStrategy {
-  supports(type: QuestionType): boolean {
-    return type === QuestionType.MultipleChoice
-  }
-
-  async generate(content: string, count: number): Promise<Question[]> {
-    const questions: Question[] = []
-    
-    const paragraphs = content
-      .replace(/<[^>]*>/g, '')
-      .split(/\n\n/)
-      .filter(p => p.trim().length > 50)
-
-    for (let i = 0; i < Math.min(count, paragraphs.length); i++) {
-      const paragraph = paragraphs[i]
-      const sentences = paragraph.split(/[.!?]/).filter(s => s.trim().length > 20)
-      
-      if (sentences.length > 0) {
-        const factSentence = sentences[0].trim()
-        
-        questions.push({
-          id: `mcq-${Date.now()}-${i}`,
-          text: `Qual das alternativas melhor representa o conceito apresentado: "${factSentence.substring(0, 100)}..."?`,
-          type: QuestionType.MultipleChoice,
-          options: [
-            factSentence,
-            'Alternativa gerada automaticamente A',
-            'Alternativa gerada automaticamente B',
-            'Alternativa gerada automaticamente C'
-          ],
-          correctAnswer: 0,
-          explanation: 'Esta informação está presente no texto original.'
-        })
-      }
-    }
-
-    return questions
-  }
-}
-
-export class TrueFalseStrategy implements QuestionGenerationStrategy {
-  supports(type: QuestionType): boolean {
-    return type === QuestionType.TrueFalse
-  }
-
-  async generate(content: string, count: number): Promise<Question[]> {
-    const questions: Question[] = []
-    
-    const sentences = content
-      .replace(/<[^>]*>/g, '')
-      .split(/[.!?]/)
-      .filter(s => s.trim().length > 30)
-
-    for (let i = 0; i < Math.min(count, sentences.length); i++) {
-      const sentence = sentences[i].trim()
-      
-      questions.push({
-        id: `tf-${Date.now()}-${i}`,
-        text: sentence,
-        type: QuestionType.TrueFalse,
-        options: ['Verdadeiro', 'Falso'],
-        correctAnswer: 0,
-        explanation: 'Esta afirmação é verdadeira conforme o texto.'
-      })
-    }
-
-    return questions
-  }
-}
+const REGISTERABLE_TYPES: QuestionType[] = [
+  QuestionType.MultipleChoice,
+  QuestionType.TrueFalse,
+  QuestionType.FillInTheBlank
+]
 
 export class QuestionGenerator {
-  private strategies: Map<QuestionType, QuestionGenerationStrategy> = new Map()
+  private readonly strategies = new Map<QuestionType, QuestionGenerationStrategy[]>()
 
-  constructor() {
-    this.registerStrategy(new MultipleChoiceStrategy())
-    this.registerStrategy(new TrueFalseStrategy())
+  constructor(
+    customStrategies?: QuestionGenerationStrategy[],
+    aiClient?: QuizAIClient
+  ) {
+    const strategies = customStrategies ?? this.buildDefaultStrategies(aiClient)
+    strategies.forEach(strategy => this.registerStrategy(strategy))
   }
 
   registerStrategy(strategy: QuestionGenerationStrategy): void {
-    if (strategy.supports(QuestionType.MultipleChoice)) {
-      this.strategies.set(QuestionType.MultipleChoice, strategy)
-    }
-    if (strategy.supports(QuestionType.TrueFalse)) {
-      this.strategies.set(QuestionType.TrueFalse, strategy)
-    }
+    REGISTERABLE_TYPES.forEach(type => {
+      if (!strategy.supports(type)) {
+        return
+      }
+
+      const registered = this.strategies.get(type) ?? []
+      this.strategies.set(type, [...registered, strategy])
+    })
   }
 
   async generateQuestions(
@@ -92,22 +37,62 @@ export class QuestionGenerator {
     type: QuestionType,
     count: number = 5
   ): Promise<Question[]> {
-    const strategy = this.strategies.get(type)
-    
-    if (!strategy) {
+    const strategies = this.strategies.get(type) ?? []
+
+    if (strategies.length === 0) {
       throw new Error(`No strategy found for question type: ${type}`)
     }
 
-    return strategy.generate(content, count)
+    const errors: unknown[] = []
+
+    for (const strategy of strategies) {
+      if (!strategy.isAvailable()) {
+        continue
+      }
+
+      try {
+        const questions = await strategy.generate(content, count)
+        if (questions.length > 0) {
+          return questions.slice(0, count)
+        }
+      } catch (error) {
+        errors.push(error)
+      }
+    }
+
+    if (errors.length > 0) {
+      console.warn(`All strategies failed for question type ${type}`, errors)
+    }
+
+    throw new Error(`No available strategy succeeded for question type: ${type}`)
   }
 
   async generateMixedQuiz(content: string, totalQuestions: number = 10): Promise<Question[]> {
     const mcqCount = Math.ceil(totalQuestions * 0.6)
-    const tfCount = totalQuestions - mcqCount
+    const tfCount = Math.max(totalQuestions - mcqCount, 0)
 
     const mcqQuestions = await this.generateQuestions(content, QuestionType.MultipleChoice, mcqCount)
-    const tfQuestions = await this.generateQuestions(content, QuestionType.TrueFalse, tfCount)
+    const tfQuestions = tfCount > 0
+      ? await this.generateQuestions(content, QuestionType.TrueFalse, tfCount)
+      : []
 
-    return [...mcqQuestions, ...tfQuestions].sort(() => Math.random() - 0.5)
+    const combined = [...mcqQuestions, ...tfQuestions]
+
+    if (combined.length === 0) {
+      throw new Error('Failed to generate quiz questions')
+    }
+
+    return combined.sort(() => Math.random() - 0.5)
+  }
+
+  private buildDefaultStrategies(aiClient?: QuizAIClient): QuestionGenerationStrategy[] {
+    const client = aiClient ?? new OpenAIQuizClient()
+
+    return [
+      new AIMultipleChoiceStrategy(client),
+      new AITrueFalseStrategy(client),
+      new MultipleChoiceStrategy(),
+      new TrueFalseStrategy()
+    ]
   }
 }

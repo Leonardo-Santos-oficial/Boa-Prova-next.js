@@ -1,4 +1,4 @@
-import { QuizState, QuizContext, QuizData } from './types'
+import { QuizState, QuizContext, QuizData, Question } from './types'
 import { NotStartedState } from './states'
 
 export class Quiz implements QuizContext {
@@ -67,7 +67,7 @@ export class Quiz implements QuizContext {
     this.state.review(this)
   }
 
-  getCurrentQuestion() {
+  getCurrentQuestion(): Question | undefined {
     return this.quiz.questions[this.currentQuestionIndex]
   }
 

@@ -11,11 +11,11 @@ abstract class BaseStudyStrategy implements StudyPlanStrategy {
   abstract recommendBreakFrequency(): number
 
   distributeTopics(topics: StudyTopic[], days: number): StudySession[] {
+    void days
     const sessions: StudySession[] = []
     const dailyHours = this.calculateDailyHours()
     
     const sortedTopics = this.prioritizeTopics(topics)
-    const totalHours = sortedTopics.reduce((sum, topic) => sum + topic.estimatedHours, 0)
     
     let currentDay = 0
     let currentDayHours = 0

@@ -48,7 +48,10 @@ export class InProgressState implements QuizState {
     
     if (currentIndex < totalQuestions - 1) {
       context.setCurrentQuestionIndex(currentIndex + 1)
+      return
     }
+
+    context.setCurrentQuestionIndex(totalQuestions)
   }
 
   complete(context: QuizContext): void {

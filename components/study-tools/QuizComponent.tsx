@@ -14,9 +14,11 @@ export function QuizComponent({ content, onClose }: QuizComponentProps) {
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [score, setScore] = useState<number | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const generateQuiz = async () => {
     setIsGenerating(true)
+    setErrorMessage(null)
     try {
       const generator = new QuestionGenerator()
       const questions = await generator.generateMixedQuiz(content, 5)
@@ -32,21 +34,25 @@ export function QuizComponent({ content, onClose }: QuizComponentProps) {
       setQuiz(newQuiz)
     } catch (error) {
       console.error('Failed to generate quiz:', error)
+      setErrorMessage('Não foi possível gerar o quiz automaticamente. Tente novamente mais tarde.')
     } finally {
       setIsGenerating(false)
     }
   }
 
   useEffect(() => {
-    if (quiz) {
-      setCurrentQuestion(quiz.getCurrentQuestion())
+    if (!quiz) {
+      setCurrentQuestion(null)
     }
   }, [quiz])
 
   const handleStart = () => {
     if (!quiz) return
+    if (quiz.getState().getName() !== 'NOT_STARTED') {
+      return
+    }
     quiz.start()
-    setCurrentQuestion(quiz.getCurrentQuestion())
+    setCurrentQuestion(quiz.getCurrentQuestion() ?? null)
   }
 
   const handleAnswer = (answerIndex: number) => {
@@ -61,6 +67,7 @@ export function QuizComponent({ content, onClose }: QuizComponentProps) {
         setCurrentQuestion(nextQuestion)
         setSelectedAnswer(null)
       } else {
+        setCurrentQuestion(null)
         handleComplete()
       }
     }, 800)
@@ -70,7 +77,9 @@ export function QuizComponent({ content, onClose }: QuizComponentProps) {
     if (!quiz) return
     
     try {
-      quiz.complete()
+      if (quiz.getState().canComplete()) {
+        quiz.complete()
+      }
       setScore(quiz.calculateScore())
     } catch (error) {
       console.error('Cannot complete quiz:', error)
@@ -80,7 +89,7 @@ export function QuizComponent({ content, onClose }: QuizComponentProps) {
   const handleReview = () => {
     if (!quiz) return
     quiz.review()
-    setCurrentQuestion(quiz.getCurrentQuestion())
+  setCurrentQuestion(quiz.getCurrentQuestion() ?? null)
     setScore(null)
   }
 
@@ -99,6 +108,11 @@ export function QuizComponent({ content, onClose }: QuizComponentProps) {
         <p className="text-gray-600 dark:text-gray-400 mb-4">
           Teste seus conhecimentos sobre este conteúdo com um quiz gerado automaticamente.
         </p>
+        {errorMessage && (
+          <p className="mb-4 text-sm text-red-600 dark:text-red-400" role="alert">
+            {errorMessage}
+          </p>
+        )}
         <div className="flex space-x-3">
           <button
             onClick={generateQuiz}
@@ -242,7 +256,7 @@ export function QuizComponent({ content, onClose }: QuizComponentProps) {
             <button
               onClick={() => {
                 quiz.setCurrentQuestionIndex(questionIndex - 1)
-                setCurrentQuestion(quiz.getCurrentQuestion())
+                setCurrentQuestion(quiz.getCurrentQuestion() ?? null)
               }}
               className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg"
             >
@@ -253,7 +267,7 @@ export function QuizComponent({ content, onClose }: QuizComponentProps) {
             <button
               onClick={() => {
                 quiz.setCurrentQuestionIndex(questionIndex + 1)
-                setCurrentQuestion(quiz.getCurrentQuestion())
+                setCurrentQuestion(quiz.getCurrentQuestion() ?? null)
               }}
               className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg"
             >

@@ -44,14 +44,15 @@ export abstract class BasePageRenderer<TData, TProps> {
   protected abstract transformData(data: TData): TProps
 
   protected handleInvalidData(_data: TData): GetStaticPropsResult<TProps> {
+    void _data
     if (this.options.notFoundOnNull) {
       return { notFound: true }
     }
     throw new Error('Invalid data received')
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected handleError(error: unknown, _params: PageParams): GetStaticPropsResult<TProps> {
+    void _params
     console.error('PageRenderer: Error rendering page', { error, params: _params })
     return { notFound: true }
   }
