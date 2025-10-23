@@ -112,8 +112,9 @@ describe('Study Plan Strategy Pattern', () => {
     const targetDate = new Date()
     targetDate.setDate(targetDate.getDate() + 30)
     
-    const plan = generator.generatePlan(mockTopics, StudyStrategyType.Regular, targetDate)
+    const plan = generator.generatePlan(mockTopics, StudyStrategyType.Regular, 'test-user', targetDate)
     
     expect(plan.targetDate).toEqual(targetDate)
+    expect(plan.userId).toBe('test-user')
   })
 })

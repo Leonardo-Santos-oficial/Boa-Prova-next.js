@@ -51,5 +51,10 @@ export interface StudyPlanState {
 }
 
 export interface StudyPlanGenerator {
-  generatePlan(topics: StudyTopic[], strategy: StudyStrategyType, targetDate?: Date): StudyPlan
+  generatePlan(
+    topics: StudyTopic[], 
+    strategy: StudyStrategyType, 
+    userId?: string,
+    targetDate?: Date
+  ): StudyPlan
 }

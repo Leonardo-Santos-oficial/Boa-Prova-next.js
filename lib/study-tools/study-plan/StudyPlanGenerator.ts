@@ -19,6 +19,7 @@ export class DefaultStudyPlanGenerator implements StudyPlanGenerator {
   generatePlan(
     topics: StudyTopic[],
     strategyType: StudyStrategyType,
+    userId: string = 'guest-user',
     targetDate?: Date
   ): StudyPlan {
     const strategy = this.strategies.get(strategyType)
@@ -32,7 +33,7 @@ export class DefaultStudyPlanGenerator implements StudyPlanGenerator {
 
     return {
       id: `plan-${Date.now()}`,
-      userId: 'current-user',
+      userId,
       topics: JSON.parse(JSON.stringify(topics)),
       sessions,
       strategy: strategyType,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
   StudyPlan,
   StudyTopic,
@@ -6,12 +6,33 @@ import {
 } from '@/lib/study-tools/study-plan/types'
 import { DefaultStudyPlanGenerator } from '@/lib/study-tools/study-plan/StudyPlanGenerator'
 import { StudyPlanOriginator, StudyPlanCaretaker } from '@/lib/study-tools/study-plan/StudyPlanMemento'
+import { StudyPlanRepository } from '@/lib/study-tools/study-plan/StudyPlanRepository'
+import { LocalStorageStudyPlanRepository } from '@/lib/study-tools/study-plan/LocalStorageRepository'
+
+const DEFAULT_USER_ID = 'guest-user'
 
 export function StudyPlanComponent() {
   const [plan, setPlan] = useState<StudyPlan | null>(null)
   const [originator, setOriginator] = useState<StudyPlanOriginator | null>(null)
-  const [caretaker] = useState(new StudyPlanCaretaker())
   const [showHistory, setShowHistory] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Criar repository e caretaker apenas uma vez, no cliente
+  const repository = useMemo<StudyPlanRepository>(() => {
+    if (typeof window !== 'undefined') {
+      return new LocalStorageStudyPlanRepository()
+    }
+    // Retorna um mock durante SSR
+    return {
+      save: async () => {},
+      load: async () => null,
+      delete: async () => {},
+      exists: async () => false
+    } as StudyPlanRepository
+  }, [])
+
+  const caretaker = useMemo(() => new StudyPlanCaretaker(), [])
 
   const [topics] = useState<StudyTopic[]>([
     {
@@ -39,33 +60,100 @@ export function StudyPlanComponent() {
 
   const [strategy, setStrategy] = useState<StudyStrategyType>(StudyStrategyType.Regular)
 
-  const handleGeneratePlan = () => {
+  // Marcar quando o componente está montado no cliente
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  useEffect(() => {
+    // Só carregar no cliente
+    if (!isMounted) return
+
+    const loadPlan = async () => {
+      setIsLoading(true)
+      try {
+        const savedPlan = await repository.load(DEFAULT_USER_ID)
+        if (savedPlan) {
+          setPlan(savedPlan)
+          const planOriginator = new StudyPlanOriginator(savedPlan)
+          setOriginator(planOriginator)
+          caretaker.save(savedPlan)
+        }
+      } catch (error) {
+        console.error('Failed to load study plan:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadPlan()
+  }, [isMounted, repository, caretaker])
+
+  const savePlan = async (planToSave: StudyPlan) => {
+    try {
+      await repository.save(planToSave)
+    } catch (error) {
+      console.error('Failed to save study plan:', error)
+      throw error
+    }
+  }
+
+  const handleGeneratePlan = async () => {
     const generator = new DefaultStudyPlanGenerator()
-    const newPlan = generator.generatePlan(topics, strategy)
+    const newPlan = generator.generatePlan(topics, strategy, DEFAULT_USER_ID)
     
     setPlan(newPlan)
     const planOriginator = new StudyPlanOriginator(newPlan)
     setOriginator(planOriginator)
     caretaker.save(newPlan)
+    await savePlan(newPlan)
   }
 
-  const handleCompleteSession = (sessionId: string) => {
+  const handleCompleteSession = async (sessionId: string) => {
     if (!originator || !plan) return
 
     originator.completeSession(sessionId)
-    caretaker.save(originator.getPlan())
-    setPlan({ ...originator.getPlan() })
+    const updatedPlan = originator.getPlan()
+    caretaker.save(updatedPlan)
+    setPlan({ ...updatedPlan })
+    await savePlan(updatedPlan)
   }
 
-  const handleRestoreHistory = (index: number) => {
+  const handleRestoreHistory = async (index: number) => {
     if (!originator) return
 
     const state = caretaker.restore(index)
     if (state) {
       originator.restoreFromMemento(state)
-      setPlan({ ...originator.getPlan() })
+      const restoredPlan = originator.getPlan()
+      setPlan({ ...restoredPlan })
       setShowHistory(false)
+      await savePlan(restoredPlan)
     }
+  }
+
+  const handleDeletePlan = async () => {
+    if (!plan || !window.confirm('Tem certeza que deseja excluir este plano?')) return
+
+    try {
+      await repository.delete(DEFAULT_USER_ID)
+      setPlan(null)
+      setOriginator(null)
+      caretaker.clear()
+    } catch (error) {
+      console.error('Failed to delete study plan:', error)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Carregando...</p>
+        </div>
+      </div>
+    )
   }
 
   if (!plan) {
@@ -126,12 +214,20 @@ export function StudyPlanComponent() {
     <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-bold">Meu Plano de Estudos</h3>
-        <button
-          onClick={() => setShowHistory(!showHistory)}
-          className="text-sm px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-lg"
-        >
-          📜 Histórico
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowHistory(!showHistory)}
+            className="text-sm px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+          >
+            📜 Histórico
+          </button>
+          <button
+            onClick={handleDeletePlan}
+            className="text-sm px-3 py-1 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/40"
+          >
+            🗑️ Excluir
+          </button>
+        </div>
       </div>
 
       {showHistory && (
