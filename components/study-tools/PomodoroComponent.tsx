@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { PomodoroTimer } from '@/lib/study-tools/pomodoro/PomodoroTimer'
 import { PomodoroPhase, PomodoroSettings, PomodoroObserver } from '@/lib/study-tools/pomodoro/types'
 import { StartCommand, PauseCommand, ResumeCommand, ResetCommand, SkipCommand } from '@/lib/study-tools/pomodoro/commands'
+import { LocalStoragePomodoroRepository, PomodoroRepository } from '@/lib/study-tools/pomodoro/PomodoroRepository'
+import { RunningState, PausedState } from '@/lib/study-tools/pomodoro/states'
+import { trackStudyToolUsage } from '@/lib/analytics'
 
 export function PomodoroComponent() {
   const [timer, setTimer] = useState<PomodoroTimer | null>(null)
@@ -9,6 +12,8 @@ export function PomodoroComponent() {
   const [phase, setPhase] = useState<PomodoroPhase>(PomodoroPhase.Work)
   const [remainingTime, setRemainingTime] = useState(25 * 60)
   const [completedSessions, setCompletedSessions] = useState(0)
+
+  const repository: PomodoroRepository = useMemo(() => new LocalStoragePomodoroRepository(), [])
 
   useEffect(() => {
     const settings: PomodoroSettings = {
@@ -20,17 +25,52 @@ export function PomodoroComponent() {
 
     const pomodoroTimer = new PomodoroTimer(settings)
 
+    const savedState = repository.load()
+    if (savedState && savedState.state !== 'IDLE') {
+      pomodoroTimer.setPhase(savedState.phase)
+      pomodoroTimer.setRemainingTime(savedState.remainingTime)
+      pomodoroTimer['completedSessions'] = savedState.completedSessions
+      
+      if (savedState.state === 'RUNNING') {
+        pomodoroTimer.setState(new RunningState())
+      } else if (savedState.state === 'PAUSED') {
+        pomodoroTimer.setState(new PausedState())
+      }
+      
+      setState(savedState.state)
+      setPhase(savedState.phase)
+      setRemainingTime(savedState.remainingTime)
+      setCompletedSessions(savedState.completedSessions)
+    }
+
     const observer: PomodoroObserver = {
       onStateChange: (newState, newPhase, newRemainingTime) => {
         setState(newState)
         setPhase(newPhase)
         setRemainingTime(newRemainingTime)
+        
+        repository.save({
+          state: newState,
+          phase: newPhase,
+          remainingTime: newRemainingTime,
+          completedSessions: pomodoroTimer.getCompletedSessions(),
+          timestamp: Date.now()
+        })
       },
-      onPhaseComplete: () => {
+      onPhaseComplete: (completedPhase: PomodoroPhase) => {
         if (typeof Audio !== 'undefined') {
           const audio = new Audio('/sounds/notification.mp3')
           audio.play().catch(() => {})
         }
+
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+          new Notification('Pomodoro', {
+            body: completedPhase === PomodoroPhase.Work ? 'Tempo de fazer uma pausa!' : 'Hora de voltar ao trabalho!',
+            icon: '/icons/pomodoro.png'
+          })
+        }
+
+        trackStudyToolUsage('Pomodoro', 'completed', { phase: completedPhase })
       },
       onSessionComplete: (sessions) => {
         setCompletedSessions(sessions)
@@ -40,16 +80,21 @@ export function PomodoroComponent() {
     pomodoroTimer.subscribe(observer)
     setTimer(pomodoroTimer)
 
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      Notification.requestPermission()
+    }
+
     return () => {
       pomodoroTimer.stopTicking()
     }
-  }, [])
+  }, [repository])
 
   const handleStart = () => {
     if (!timer) return
     const command = new StartCommand(timer)
     command.execute()
     timer.startTicking()
+    trackStudyToolUsage('Pomodoro', 'started')
   }
 
   const handlePause = () => {
@@ -57,6 +102,7 @@ export function PomodoroComponent() {
     const command = new PauseCommand(timer)
     command.execute()
     timer.stopTicking()
+    trackStudyToolUsage('Pomodoro', 'paused')
   }
 
   const handleResume = () => {
@@ -64,6 +110,7 @@ export function PomodoroComponent() {
     const command = new ResumeCommand(timer)
     command.execute()
     timer.startTicking()
+    trackStudyToolUsage('Pomodoro', 'resumed')
   }
 
   const handleReset = () => {
@@ -72,12 +119,15 @@ export function PomodoroComponent() {
     command.execute()
     timer.stopTicking()
     setCompletedSessions(0)
+    repository.clear()
+    trackStudyToolUsage('Pomodoro', 'reset')
   }
 
   const handleSkip = () => {
     if (!timer) return
     const command = new SkipCommand(timer)
     command.execute()
+    trackStudyToolUsage('Pomodoro', 'skipped')
   }
 
   const formatTime = (seconds: number): string => {
