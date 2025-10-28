@@ -61,7 +61,7 @@ test.describe('Mobile Navigation', () => {
     }
   })
 
-  test('should support touch gestures', async ({ page }) => {
+  test('should support touch gestures', async () => {
     await navigationPage.mobileNavToggle.tap()
     const isVisible = await navigationPage.isMobileMenuVisible()
     expect(isVisible).toBe(true)
@@ -89,7 +89,7 @@ test.describe('Mobile Navigation', () => {
 })
 
 test.describe('Responsive Behavior', () => {
-  test('should adapt layout for tablet', async ({ page, browser }) => {
+  test('should adapt layout for tablet', async ({ browser }) => {
     const context = await browser.newContext({
       ...devices['iPad Pro'],
     })

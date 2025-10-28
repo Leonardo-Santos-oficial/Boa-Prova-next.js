@@ -105,11 +105,12 @@ test.describe('Performance Metrics', () => {
     await page.goto('/')
 
     const metrics = await page.evaluate(() => {
-      return new Promise((resolve) => {
+      return new Promise<{ lcp: number }>((resolve) => {
         new PerformanceObserver((list) => {
           const entries = list.getEntries()
           const lcp = entries.find((e) => e.entryType === 'largest-contentful-paint')
-          resolve({ lcp: lcp ? (lcp as any).renderTime : 0 })
+          const lcpEntry = lcp as PerformanceEntry & { renderTime?: number }
+          resolve({ lcp: lcpEntry?.renderTime || 0 })
         }).observe({ entryTypes: ['largest-contentful-paint'] })
 
         setTimeout(() => resolve({ lcp: 0 }), 5000)
@@ -124,8 +125,8 @@ test.describe('Performance Metrics', () => {
     expect(response?.status()).toBe(200)
 
     const performanceMetrics = await page.evaluate(() => {
-      const entries = performance.getEntriesByType('resource')
-      return entries.map((e: any) => ({
+      const entries = performance.getEntriesByType('resource') as PerformanceResourceTiming[]
+      return entries.map((e) => ({
         name: e.name,
         duration: e.duration,
       }))

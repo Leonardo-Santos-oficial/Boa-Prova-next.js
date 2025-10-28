@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss'
+import typography from '@tailwindcss/typography'
 
 const config: Config = {
   content: [
@@ -22,58 +23,58 @@ const config: Config = {
           900: '#1e3a8a',
         },
       },
-      typography: (theme: any) => ({
+      typography: {
         DEFAULT: {
           css: {
             maxWidth: 'none',
-            color: theme('colors.gray.700'),
+            color: '#374151', // colors.gray.700
             a: {
-              color: theme('colors.primary.600'),
+              color: '#2563eb', // colors.primary.600
               textDecoration: 'none',
               '&:hover': {
-                color: theme('colors.primary.700'),
+                color: '#1d4ed8', // colors.primary.700
               },
             },
             h1: {
-              color: theme('colors.gray.900'),
+              color: '#111827', // colors.gray.900
             },
             h2: {
-              color: theme('colors.gray.900'),
+              color: '#111827',
             },
             h3: {
-              color: theme('colors.gray.900'),
+              color: '#111827',
             },
             strong: {
-              color: theme('colors.gray.900'),
+              color: '#111827',
             },
           },
         },
         dark: {
           css: {
-            color: theme('colors.gray.300'),
+            color: '#d1d5db', // colors.gray.300
             a: {
-              color: theme('colors.primary.400'),
+              color: '#60a5fa', // colors.primary.400
               '&:hover': {
-                color: theme('colors.primary.300'),
+                color: '#93c5fd', // colors.primary.300
               },
             },
-            h1: { color: theme('colors.gray.100') },
-            h2: { color: theme('colors.gray.100') },
-            h3: { color: theme('colors.gray.100') },
-            h4: { color: theme('colors.gray.100') },
-            strong: { color: theme('colors.gray.100') },
-            code: { color: theme('colors.gray.100') },
+            h1: { color: '#f3f4f6' }, // colors.gray.100
+            h2: { color: '#f3f4f6' },
+            h3: { color: '#f3f4f6' },
+            h4: { color: '#f3f4f6' },
+            strong: { color: '#f3f4f6' },
+            code: { color: '#f3f4f6' },
             blockquote: {
-              color: theme('colors.gray.300'),
-              borderLeftColor: theme('colors.gray.700'),
+              color: '#d1d5db',
+              borderLeftColor: '#374151', // colors.gray.700
             },
           },
         },
-      }),
+      },
     },
   },
   plugins: [
-    require('@tailwindcss/typography'),
+    typography,
   ],
 }
 

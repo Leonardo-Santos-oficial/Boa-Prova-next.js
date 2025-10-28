@@ -1,0 +1,72 @@
+/* Ad Slot Styles - Ensures proper dimensions for AdSense */
+
+.ad-slot {
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+}
+
+.dark .ad-slot {
+  background: #1a1a1a;
+  border-color: #2d2d2d;
+}
+
+/* Ensure minimum dimensions for ad containers */
+.ad-slot-header {
+  min-width: 728px;
+  min-height: 90px;
+}
+
+.ad-slot-sidebar {
+  min-width: 300px;
+  min-height: 250px;
+}
+
+.ad-slot-in-content {
+  min-width: 336px;
+  min-height: 280px;
+}
+
+.ad-slot-footer {
+  min-width: 728px;
+  min-height: 90px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ad-slot-header,
+  .ad-slot-footer {
+    min-width: 320px;
+    min-height: 50px;
+  }
+  
+  .ad-slot-sidebar {
+    min-width: 300px;
+    min-height: 250px;
+  }
+  
+  .ad-slot-in-content {
+    min-width: 300px;
+    min-height: 250px;
+  }
+}
+
+/* Placeholder styling */
+.ad-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+/* AdSense responsive container */
+.ad-slot ins.adsbygoogle {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}

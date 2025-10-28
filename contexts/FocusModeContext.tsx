@@ -34,8 +34,8 @@ class FocusModeSubject {
     }
     
     // Track analytics
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'focus_mode_toggle', {
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'focus_mode_toggle', {
         event_category: 'study_tools',
         event_label: this.state ? 'activated' : 'deactivated',
       })

@@ -4,6 +4,7 @@ import Layout from '@/components/layout/Layout'
 import { FocusModeProvider } from '@/contexts/FocusModeContext'
 import '@/styles/globals.css'
 import '@/styles/navigation.css'
+import '@/styles/ads.css'
 
 export default function App({ Component, pageProps }: AppProps) {
   return (

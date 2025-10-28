@@ -30,7 +30,7 @@ test.describe('Navigation Menu', () => {
   })
 
   test.describe('Dropdown Menu', () => {
-    test('should show submenu on hover', async ({ page }) => {
+    test('should show submenu on hover', async () => {
       await navigationPage.hoverOnMenuItem('Concursos por Estado')
       
       const submenuVisible = await navigationPage.isSubmenuVisible('Concursos por Estado')
@@ -59,7 +59,7 @@ test.describe('Navigation Menu', () => {
       await expect(page).toHaveURL(/sao-paulo/)
     })
 
-    test('should support nested submenus', async ({ page }) => {
+    test('should support nested submenus', async () => {
       // Skip this test as current menu doesn't have nested submenus
       test.skip()
     })

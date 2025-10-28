@@ -152,7 +152,7 @@ test.describe('Study Plan Repository & Persistence', () => {
     await expect(page.locator('text=Plano de Estudos Personalizado')).toBeVisible()
   })
 
-  test('should isolate plans by userId', async ({ page, context }) => {
+  test('should isolate plans by userId', async ({ page }) => {
     await page.evaluate(() => {
       localStorage.setItem('study-plan-user-1', JSON.stringify({
         id: 'plan-1',

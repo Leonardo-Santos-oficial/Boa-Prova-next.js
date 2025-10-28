@@ -192,7 +192,11 @@ describe('FocusModeContext', () => {
         result.current.toggle()
       })
 
-      expect((window as any).gtag).toHaveBeenCalledWith('event', 'focus_mode_toggle', {
+      const windowWithGtag = window as Window & {
+        gtag?: jest.Mock
+      }
+      
+      expect(windowWithGtag.gtag).toHaveBeenCalledWith('event', 'focus_mode_toggle', {
         event_category: 'study_tools',
         event_label: 'activated',
       })
@@ -213,7 +217,11 @@ describe('FocusModeContext', () => {
         result.current.toggle()
       })
 
-      expect((window as any).gtag).toHaveBeenCalledWith('event', 'focus_mode_toggle', {
+      const windowWithGtag = window as Window & {
+        gtag?: jest.Mock
+      }
+      
+      expect(windowWithGtag.gtag).toHaveBeenCalledWith('event', 'focus_mode_toggle', {
         event_category: 'study_tools',
         event_label: 'deactivated',
       })

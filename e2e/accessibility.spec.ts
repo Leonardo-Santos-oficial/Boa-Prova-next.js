@@ -187,7 +187,6 @@ test.describe('Accessibility Tests', () => {
       const header = page.locator('header, [role="banner"]')
       const nav = page.locator('nav, [role="navigation"]')
       const main = page.locator('main, [role="main"]')
-      const footer = page.locator('footer, [role="contentinfo"]')
 
       await expect(header).toBeVisible()
       await expect(nav).toBeVisible()

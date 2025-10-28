@@ -1,5 +1,5 @@
 import { LoopPreventionDecorator } from '../../../lib/redirects/loop-prevention-decorator'
-import { RedirectHandler, RedirectRequest, RedirectResult } from '../../../lib/redirects/redirect-chain'
+import { RedirectHandler, RedirectResult } from '../../../lib/redirects/redirect-chain'
 
 class MockRedirectHandler extends RedirectHandler {
   private mockResult: RedirectResult | null
@@ -13,7 +13,8 @@ class MockRedirectHandler extends RedirectHandler {
     this.mockResult = result
   }
 
-  protected async process(_request: RedirectRequest): Promise<RedirectResult | null> {
+  protected async process(): Promise<RedirectResult | null> {
+    // Request parameter intentionally omitted as this is a mock
     return this.mockResult
   }
 }
