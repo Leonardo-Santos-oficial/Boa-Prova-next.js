@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import ThemeToggle from '../navigation/ThemeToggle'
+import FocusModeToggle from '../study-tools/FocusModeToggle'
 import { MainNav } from '../navigation/MainNav'
 import { MobileNav } from '../navigation/MobileNav'
 import { NavBuilder } from '../navigation/NavBuilder'
@@ -10,11 +11,17 @@ export default function Header() {
   const navItems = navBuilder.buildMany(navigationData)
 
   return (
-    <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+    <header 
+      role="banner"
+      className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link href="/" className="text-2xl font-bold text-primary-600 dark:text-primary-400">
+            <Link 
+              href="/" 
+              className="text-2xl font-bold text-primary-600 dark:text-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded"
+            >
               Boa Prova
             </Link>
           </div>
@@ -23,7 +30,10 @@ export default function Header() {
             <MainNav items={navItems} />
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 md:space-x-4">
+            <div className="hidden md:block">
+              <FocusModeToggle />
+            </div>
             <div className="md:hidden">
               <MobileNav items={navItems} />
             </div>

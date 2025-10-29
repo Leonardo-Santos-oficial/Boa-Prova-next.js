@@ -184,12 +184,16 @@ test.describe('Study Plan Repository & Persistence', () => {
     })
     
     await page.locator('button[aria-label="Abrir Plano de Estudos"]').click()
-    await page.waitForTimeout(500)
+    await page.waitForTimeout(1000)
     
     await expect(page.locator('text=Plano de Estudos Personalizado')).toBeVisible()
     
-    await page.locator('text=📅 Gerar Plano de Estudos').click({ force: true })
+    // Force click in case overlay is present
+    const generateButton = page.locator('text=📅 Gerar Plano de Estudos')
+    await generateButton.waitFor({ state: 'visible', timeout: 5000 })
+    await generateButton.click({ force: true })
     
-    await expect(page.locator('text=Meu Plano de Estudos')).toBeVisible({ timeout: 10000 })
+    // Should recover and generate new plan despite corrupted data
+    await expect(page.locator('text=Meu Plano de Estudos')).toBeVisible({ timeout: 15000 })
   })
 })

@@ -44,7 +44,21 @@ export class NavigationPage {
   }
 
   async openMobileMenu(): Promise<void> {
-    await this.mobileNavToggle.click()
+    await this.mobileNavToggle.click({ force: true })
+    // Wait for aria-expanded to be true
+    await this.page.waitForFunction(() => {
+      const toggle = document.querySelector('.mobile-nav-toggle')
+      return toggle?.getAttribute('aria-expanded') === 'true'
+    }, { timeout: 5000 })
+  }
+
+  async closeMobileMenu(): Promise<void> {
+    await this.mobileNavToggle.click({ force: true })
+    // Wait for aria-expanded to be false
+    await this.page.waitForFunction(() => {
+      const toggle = document.querySelector('.mobile-nav-toggle')
+      return toggle?.getAttribute('aria-expanded') === 'false'
+    }, { timeout: 5000 })
   }
 
   async isMobileMenuVisible(): Promise<boolean> {

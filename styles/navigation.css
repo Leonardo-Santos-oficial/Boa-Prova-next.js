@@ -33,6 +33,18 @@
   text-decoration: none;
   white-space: nowrap;
   border-bottom: 2px solid transparent;
+  border-radius: 0.25rem;
+}
+
+.main-nav .nav-item.depth-0 > .nav-link:focus,
+.main-nav .nav-item.depth-0 > .nav-label:focus {
+  outline: 2px solid rgb(79, 70, 229);
+  outline-offset: 2px;
+}
+
+.dark .main-nav .nav-item.depth-0 > .nav-link:focus,
+.dark .main-nav .nav-item.depth-0 > .nav-label:focus {
+  outline-color: rgb(165, 180, 252);
 }
 
 .dark .main-nav .nav-item.depth-0 > .nav-link,
@@ -136,6 +148,18 @@
   transition: background-color 0.2s;
   font-weight: 400;
   border-bottom: none;
+  border-radius: 0.25rem;
+}
+
+.main-nav .nav-submenu .nav-link:focus,
+.main-nav .nav-submenu .nav-label:focus {
+  outline: 2px solid rgb(79, 70, 229);
+  outline-offset: 2px;
+}
+
+.dark .main-nav .nav-submenu .nav-link:focus,
+.dark .main-nav .nav-submenu .nav-label:focus {
+  outline-color: rgb(165, 180, 252);
 }
 
 .dark .main-nav .nav-submenu .nav-link,

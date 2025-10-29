@@ -82,8 +82,11 @@ test.describe('Study Tools Features', () => {
     await page.locator('button[aria-label="Abrir Quiz"]').click()
     await expect(page.locator('text=Gerar Mini-Quiz')).toBeVisible()
     
-    // Click on overlay with force to bypass header interception
-    await page.locator('.fixed.inset-0').first().click({ force: true })
+    // Click on overlay - use more specific selector for the backdrop
+    await page.locator('.fixed.inset-0.bg-black').first().click({ force: true })
+    
+    // Wait a bit for animation
+    await page.waitForTimeout(300)
     
     await expect(page.locator('text=Gerar Mini-Quiz')).not.toBeVisible()
   })

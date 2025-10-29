@@ -12,8 +12,17 @@ test.describe('Navigation Menu', () => {
     await homePage.goto()
   })
 
-  test('should display main navigation menu', async () => {
-    await expect(navigationPage.mainNav).toBeVisible()
+  test('should display main navigation menu', async ({ page }) => {
+    // Main nav is hidden on mobile, visible on desktop
+    const viewport = page.viewportSize()
+    const isMobile = viewport && viewport.width < 768
+    
+    if (isMobile) {
+      // On mobile, check for mobile toggle instead
+      await expect(navigationPage.mobileNavToggle).toBeVisible()
+    } else {
+      await expect(navigationPage.mainNav).toBeVisible()
+    }
   })
 
   test('should show logo and home link', async ({ page }) => {
@@ -30,7 +39,15 @@ test.describe('Navigation Menu', () => {
   })
 
   test.describe('Dropdown Menu', () => {
-    test('should show submenu on hover', async () => {
+    test('should show submenu on hover', async ({ page }) => {
+      // Skip on mobile as hover doesn't work the same way
+      const viewport = page.viewportSize()
+      const isMobile = viewport && viewport.width < 768
+      if (isMobile) {
+        test.skip()
+        return
+      }
+      
       await navigationPage.hoverOnMenuItem('Concursos por Estado')
       
       const submenuVisible = await navigationPage.isSubmenuVisible('Concursos por Estado')
@@ -38,6 +55,13 @@ test.describe('Navigation Menu', () => {
     })
 
     test('should hide submenu when mouse leaves', async ({ page }) => {
+      const viewport = page.viewportSize()
+      const isMobile = viewport && viewport.width < 768
+      if (isMobile) {
+        test.skip()
+        return
+      }
+      
       await navigationPage.hoverOnMenuItem('Concursos por Estado')
       await page.mouse.move(0, 0)
       await page.waitForTimeout(500)
@@ -46,7 +70,14 @@ test.describe('Navigation Menu', () => {
       expect(submenuVisible).toBe(false)
     })
 
-    test('should display submenu items', async () => {
+    test('should display submenu items', async ({ page }) => {
+      const viewport = page.viewportSize()
+      const isMobile = viewport && viewport.width < 768
+      if (isMobile) {
+        test.skip()
+        return
+      }
+      
       await navigationPage.hoverOnMenuItem('Concursos por Estado')
       const items = await navigationPage.getSubmenuItems('Concursos por Estado')
       
@@ -55,6 +86,13 @@ test.describe('Navigation Menu', () => {
     })
 
     test('should navigate to submenu item', async ({ page }) => {
+      const viewport = page.viewportSize()
+      const isMobile = viewport && viewport.width < 768
+      if (isMobile) {
+        test.skip()
+        return
+      }
+      
       await navigationPage.navigateToSubmenuItem('Concursos por Estado', 'SP')
       await expect(page).toHaveURL(/sao-paulo/)
     })
@@ -75,6 +113,13 @@ test.describe('Navigation Menu', () => {
     })
 
     test('should open submenu with Enter key', async ({ page }) => {
+      const viewport = page.viewportSize()
+      const isMobile = viewport && viewport.width < 768
+      if (isMobile) {
+        test.skip()
+        return
+      }
+      
       const estadosLink = page.getByText('Concursos por Estado').first()
       await estadosLink.focus()
       await page.keyboard.press('Enter')
